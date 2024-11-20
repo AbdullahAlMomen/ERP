@@ -1,4 +1,5 @@
-﻿using ERP.Models;
+﻿using ERP.Entities;
+using ERP.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,5 +14,7 @@ namespace ERP
         {
             base.OnModelCreating(builder);
         }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Product> Products { get; set; }
     }
 }
