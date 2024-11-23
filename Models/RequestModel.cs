@@ -4,7 +4,9 @@ namespace ERP.Models
 {
     public class OrderUpdateRequestModel
     {
+        [Required]
         public int orderId {  get; set; }
+        [Required]
         public decimal orderQuantity { get; set; }
     }
     public class CreateOrderRequest

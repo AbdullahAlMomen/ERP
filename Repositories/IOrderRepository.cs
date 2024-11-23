@@ -7,6 +7,7 @@ namespace ERP.Repositories
     public interface IOrderRepository:IRepositoryBase<Order>
     {
         public Task<List<OrderDetais>> GetOrderDetaisAsync();
+        public Task<List<TopCustomers>> GetTopCustomers();
     }
     public class OrderRepository : RepositoryBase<Order>, IOrderRepository
     {
@@ -26,6 +27,18 @@ namespace ERP.Repositories
                 OrderQuantity=x.Quantity,
                 CustomerName=x.CustomerName
             }).OrderByDescending(x=>x.OrderDate).ToListAsync();
+        }
+
+        public async Task<List<TopCustomers>> GetTopCustomers()
+        {
+            return await _context.Orders.Select(x => new TopCustomers
+            {
+                CustomerName = x.CustomerName,
+                Quantity = x.Quantity
+            }).GroupBy(x => x.CustomerName)
+            .Select(group => new TopCustomers { CustomerName = group.Key, Quantity = group.Sum(x => x.Quantity) })
+            .OrderByDescending(x=>x.Quantity).Take(3)
+            .ToListAsync();
         }
     }
 }

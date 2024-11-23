@@ -1,6 +1,9 @@
-﻿using ERP.Entities;
+﻿using Azure;
+using Azure.Core;
+using ERP.Entities;
 using ERP.Models;
 using ERP.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -15,6 +18,11 @@ namespace ERP.Services
         public Task<CommonResponse> DeleteOrder(int orderId);
         public Task<CommonResponse> GetOrderDetails();
         public Task<CommonResponse> CreateProduct(Product product);
+        public Task<CommonResponse> GetProductRevenueSummaries();
+        public Task<CommonResponse> GetProductDetails(decimal threshold);
+        public Task<CommonResponse> GetTopCustomers();
+        public Task<CommonResponse> GetProductWithNoOrder();
+        public Task<CommonResponse> BulkOrderInsertion(List<CreateOrderRequest> orders);
     }
 
     public class ProdcutOrderService : IProductOrderService
@@ -22,12 +30,70 @@ namespace ERP.Services
         private readonly IProductRepository _productRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly ILogger<ProdcutOrderService> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public ProdcutOrderService(IProductRepository productRepository, IOrderRepository orderRepository, ILogger<ProdcutOrderService> logger)
+        public ProdcutOrderService(IProductRepository productRepository, IOrderRepository orderRepository, ILogger<ProdcutOrderService> logger, ApplicationDbContext context)
         {
             _productRepository = productRepository;
             _orderRepository = orderRepository;
             _logger = logger;
+            _context = context;
+        }
+        public async Task<CommonResponse> BulkOrderInsertion(List<CreateOrderRequest>orders)
+        {
+            CommonResponse response = new CommonResponse();
+            if (orders == null || !orders.Any())
+            {
+                _logger.LogError("Order list cannot be null or empty. ");
+                response.Status = StatusCodes.Status400BadRequest.ToString();
+                response.Code = StatusCodes.Status400BadRequest;
+                response.Message.Add("\"Order list cannot be null or empty.");
+                return response;
+            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach(var orderRequest in orders)
+                {
+                    var order = new Order
+                    {
+                        ProductId = orderRequest.ProductId,
+                        CustomerName = orderRequest.CustomerName,
+                        Quantity = orderRequest.Quantity,
+                        OrderDate = orderRequest.OrderDate,
+                    };
+                   
+                    Product product = await _productRepository.GetByIdAsync(order.ProductId);
+                    if (product == null)
+                    {
+                        _logger.LogError($"Product with ID {order.ProductId} not found.");
+                        throw new Exception($"Product with ID {order.ProductId} not found.");
+                    }
+                    if (product.Stock < order.Quantity)
+                    {
+                        _logger.LogError($"Insufficient stock for product {product.ProductName} (ID: {product.ProductID}).");
+                        throw new Exception($"Insufficient stock for product {product.ProductName} (ID: {product.ProductID}).");
+                    }
+                    product.Stock -= order.Quantity;
+                    await _context.Orders.AddAsync(order);
+                }
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                response.Code = StatusCodes.Status200OK;
+                response.Data = orders;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                await transaction.RollbackAsync();
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+
+            return response;
+
         }
 
         public async Task<CommonResponse> CreateOrder(Order order)
@@ -156,7 +222,7 @@ namespace ERP.Services
             Product product = await _productRepository.GetByIdAsync(orderToDelete.ProductId);
             try
             {
-                await _orderRepository.DeleteAsync(orderToDelete);
+                await _orderRepository.DeleteAsync(orderToDelete.OrderId);
                 product.Stock += orderToDelete.Quantity;
                 await _productRepository.UpdateAsync(product);
                 response.Code = StatusCodes.Status200OK;
@@ -213,6 +279,90 @@ namespace ERP.Services
                 }
             }
             catch (Exception ex) {
+
+                _logger.LogError(ex.Message);
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponse> GetProductRevenueSummaries()
+        {
+            CommonResponse response = new CommonResponse();
+            try
+            {
+                _logger.LogInformation("Product Revenue Details ");
+                response.Status = StatusCodes.Status200OK.ToString();
+                response.Code = StatusCodes.Status200OK;
+                response.Data = await _productRepository.GetProductRevenueSummaries();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message);
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponse>GetProductDetails(decimal threshold)
+        {
+            CommonResponse response = new CommonResponse();
+            try
+            {
+                _logger.LogInformation("Product Details ");
+                response.Status = StatusCodes.Status200OK.ToString();
+                response.Code = StatusCodes.Status200OK;
+                response.Data = await _productRepository.GetProductDetails(threshold);
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message);
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponse> GetTopCustomers()
+        {
+            CommonResponse response = new CommonResponse();
+            try
+            {
+                _logger.LogInformation("Top Customers  ");
+                response.Status = StatusCodes.Status200OK.ToString();
+                response.Code = StatusCodes.Status200OK;
+                response.Data = await _orderRepository.GetTopCustomers();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex.Message);
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponse> GetProductWithNoOrder()
+        {
+            CommonResponse response = new CommonResponse();
+            try
+            {
+                _logger.LogInformation("Products with No orders  ");
+                response.Status = StatusCodes.Status200OK.ToString();
+                response.Code = StatusCodes.Status200OK;
+                response.Data = await _productRepository.GetProductWithNoOrder();
+            }
+            catch (Exception ex)
+            {
 
                 _logger.LogError(ex.Message);
                 response.Code = StatusCodes.Status422UnprocessableEntity;
