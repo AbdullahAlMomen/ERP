@@ -19,7 +19,8 @@ namespace ERP.Repositories
 
         public RepositoryBase(ApplicationDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _dbSet = _context.Set<T>();
         }
 
         public async Task<T> CreateAsync(T entity)

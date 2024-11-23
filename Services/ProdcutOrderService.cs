@@ -3,6 +3,7 @@ using ERP.Models;
 using ERP.Repositories;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace ERP.Services
 {
@@ -13,15 +14,16 @@ namespace ERP.Services
         public Task<CommonResponse> UpdateOrder(OrderUpdateRequestModel order);
         public Task<CommonResponse> DeleteOrder(int orderId);
         public Task<CommonResponse> GetOrderDetails();
+        public Task<CommonResponse> CreateProduct(Product product);
     }
 
     public class ProdcutOrderService : IProductOrderService
     {
         private readonly IProductRepository _productRepository;
         private readonly IOrderRepository _orderRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<ProdcutOrderService> _logger;
 
-        public ProdcutOrderService(IProductRepository productRepository, IOrderRepository orderRepository, ILogger logger)
+        public ProdcutOrderService(IProductRepository productRepository, IOrderRepository orderRepository, ILogger<ProdcutOrderService> logger)
         {
             _productRepository = productRepository;
             _orderRepository = orderRepository;
@@ -180,12 +182,38 @@ namespace ERP.Services
            
             try
             {
+                _logger.LogInformation("Order Details ");
                 response.Status = StatusCodes.Status200OK.ToString();
                 response.Code = StatusCodes.Status200OK;
                 response.Data = await _orderRepository.GetOrderDetaisAsync();
+              
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
+                response.Code = StatusCodes.Status422UnprocessableEntity;
+                response.Status = StatusCodes.Status422UnprocessableEntity.ToString();
+                response.Message.Add(ex.Message);
+            }
+            return response;
+        }
+
+        public async Task<CommonResponse> CreateProduct(Product product)
+        {
+            CommonResponse response = new CommonResponse();
+            try
+            {
+                if (product != null) {
+                
+                    await _productRepository.CreateAsync(product);
+                    response.Data = product;
+                    response.Code = StatusCodes.Status200OK;
+                    response.Message.Add("Product Create Successfully");
+                    return response;
+                }
+            }
+            catch (Exception ex) {
+
                 _logger.LogError(ex.Message);
                 response.Code = StatusCodes.Status422UnprocessableEntity;
                 response.Status = StatusCodes.Status422UnprocessableEntity.ToString();

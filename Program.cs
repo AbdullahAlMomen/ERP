@@ -9,6 +9,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ERP.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 var env_name = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var Configuration = new ConfigurationBuilder()
@@ -16,16 +17,9 @@ var Configuration = new ConfigurationBuilder()
                        .AddJsonFile($"appsettings.{env_name}.json", optional: false, reloadOnChange: true)
                        .Build();
 // Add services to the container.
-string logpath = Configuration["FilePaths:LogFileRootDirectory"];
-builder.Host.UseSerilog((hostContext, services, configuration) =>
-{
-    configuration.Enrich.FromLogContext()
-   .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Error)
-   .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Error)
-   .WriteTo.Console(theme: AnsiConsoleTheme.Literate)
-   .WriteTo.Debug(outputTemplate: DateTime.Now.ToString())
-   .WriteTo.File(logpath + ".log", rollingInterval: RollingInterval.Hour, retainedFileCountLimit: null);
-});
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
 
 // For Identity
@@ -66,7 +60,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddControllers();
 builder.Services.AddHttpLogging(options =>
 {
@@ -76,6 +69,8 @@ builder.Services.AddHttpLogging(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddServices();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
