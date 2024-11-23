@@ -1,0 +1,302 @@
+{
+	"info": {
+		"_postman_id": "35159452-f0d5-4733-87f3-fb717d283cae",
+		"name": "ERP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16117716",
+		"_collection_link": "https://galactic-firefly-371622.postman.co/workspace/abc~b88d639d-077f-4def-969b-e23fcc3d7826/collection/16117716-35159452-f0d5-4733-87f3-fb717d283cae?action=share&source=collection_link&creator=16117716"
+	},
+	"item": [
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"momen\",\r\n  \"password\": \"@Momen1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}Account/login",
+							"host": [
+								"{{server}}Account"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"Abdullah\",\r\n  \"firstName\": \"Abdullah\",\r\n  \"lastName\": \"Momen\",\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"@Momen1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}Account/register",
+							"host": [
+								"{{server}}Account"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registration Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"Abdullah1\",\r\n  \"firstName\": \"Abdullah1\",\r\n  \"lastName\": \"Momen1\",\r\n  \"email\": \"user@example.com\",\r\n  \"password\": \"@Momen1234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}Account/register_admin",
+							"host": [
+								"{{server}}Account"
+							],
+							"path": [
+								"register_admin"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CustomerOrders",
+			"item": [
+				{
+					"name": "Order Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"productId\": 1,\r\n  \"customerName\": \"Momen\",\r\n  \"quantity\": 21,\r\n  \"orderDate\": \"2024-11-23\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}ProductOrder/CreateOrder",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"CreateOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BulkOrderInsert",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n    \"productId\": 2,\r\n    \"customerName\": \"Momen\",\r\n    \"quantity\": 2,\r\n    \"orderDate\": \"2024-11-23\"\r\n    },\r\n    {\r\n    \"productId\": 3,\r\n    \"customerName\": \"Momen\",\r\n    \"quantity\": 12,\r\n    \"orderDate\": \"2024-11-23\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}ProductOrder/BulkOrderInsert",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"BulkOrderInsert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateOrder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": 4,\r\n  \"orderQuantity\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}ProductOrder/UpdateOrder",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"UpdateOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": 4,\r\n  \"orderQuantity\": 10\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}ProductOrder/UpdateOrder",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"UpdateOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Deteails",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders Summary",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Details With Threshold",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Top 3 Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}ProductOrder/GetTopCustomers",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"GetTopCustomers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product With No Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}ProductOrder/GetTopCustomers",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"GetTopCustomers"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"productName\": \"Mango Juice\",\r\n  \"unitPrice\": 12.01,\r\n  \"stock\": 400\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}ProductOrder/CreateProduct",
+							"host": [
+								"{{server}}ProductOrder"
+							],
+							"path": [
+								"CreateProduct"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
